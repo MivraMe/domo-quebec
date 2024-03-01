@@ -14,3 +14,4 @@ multiscrape:
             {% if fields|length == 3 %}
               {{ fields[2].replace(",", ".") }}
             {% endif %}
+            
