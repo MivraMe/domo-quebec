@@ -2,7 +2,12 @@
 
 Ce document détaille la configuration modifiée pour visualiser les probabilités de pointes critiques (Hydro-Québec) avec l'intégration de la température et une interface optimisée.
 
-*Ceci est le fruit du travail de JoRouss sur le discord.*
+Ceci est le fruit du travail de plusieurs membres sur le dicord 
+  * JoRouss
+  * VerbalP
+  * @mdallaire
+  * MivraMe
+  * FrancoLoco
 
 ## 📋 Résumé des modifications
 
