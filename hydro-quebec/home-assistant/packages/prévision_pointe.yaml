@@ -1,0 +1,61 @@
+- trigger:
+    - trigger: time_pattern
+      minutes: /5 
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.pirateweather_montreal
+      response_variable: hourly
+  sensor:
+      - name: Weather Forecast Montreal Hourly
+        unique_id: weather_forecast_montreal_hourly
+        icon: mdi:weather-cloudy
+        state: "{{ hourly['weather.pirateweather_montreal'].forecast[0].condition }}"
+        attributes:
+          forecast: "{{ hourly['weather.pirateweather_montreal'].forecast }}"
+
+- sensor:
+  - name: "Hydro Peak Probability"
+    unique_id: hydro_peak_probability
+    unit_of_measurement: "%"
+    state: >
+      {% set hourly_weather_sensor = 'sensor.weather_forecast_montreal_hourly' %}
+      {% set hourly_weather_forecast = state_attr(hourly_weather_sensor, 'forecast') %}
+      {% set local_times_range_am = ["06:00","09:00"] %}
+      {% set local_times_range_pm = ["16:00","20:00"] %}
+      {% set number_of_days = 7 %}
+
+      {% set datetime_start = ((as_timestamp(today_at(local_times_range_am[0])) + (86400*1)) | timestamp_utc) -%}
+      {% set datetime_end = ((as_timestamp(today_at(local_times_range_am[-1])) + (86400*1)) | timestamp_utc) -%}
+      {% set temp = hourly_weather_forecast | selectattr('datetime','>=',datetime_start) | selectattr('datetime','<',datetime_end) |map(attribute='temperature') | average | round(1) -%}
+      {{ (e**(-4.40982668173898+-0.347977050508489*temp)/(1+e**(-4.40982668173898+-0.347977050508489*temp)) *100) |round(2)  }}
+    attributes:
+      predictions: >
+        {% set hourly_weather_sensor = 'sensor.weather_forecast_montreal_hourly' %}
+        {% set hourly_weather_forecast = state_attr(hourly_weather_sensor, 'forecast') %}
+        {% set local_times_range_am = ["06:00","09:00"] %}
+        {% set local_times_range_pm = ["16:00","20:00"] %}
+        {% set number_of_days = 7 %}
+        {% set data = namespace(predictionslist=[]) %}
+
+        {% for day in range(1,number_of_days) -%}
+          
+          {% set datetime_start = ((as_timestamp(today_at(local_times_range_am[0])) + (86400*day)) | timestamp_utc) -%}
+          {% set datetime_end = ((as_timestamp(today_at(local_times_range_am[-1])) + (86400*day)) | timestamp_utc) -%}
+          {% set temp = hourly_weather_forecast | selectattr('datetime','>=',datetime_start) | selectattr('datetime','<',datetime_end) |map(attribute='temperature') | average | round(1) -%}
+          {% set datetime = ((as_timestamp(today_at(local_times_range_am[0])) + (86400*day)) | timestamp_local) %}
+          {% set prediction = ({"datetime":datetime,"day":day,"peak":'AM',"temp":temp,"critical":(e**(-4.40982668173898+-0.347977050508489*temp)/(1+e**(-4.40982668173898+-0.347977050508489*temp)) *100) |round(0)}) -%}
+          {% set data.predictionslist = data.predictionslist + [prediction] -%}
+
+          {% set datetime_start = ((as_timestamp(today_at(local_times_range_pm[0])) + (86400*day)) | timestamp_utc) -%}
+          {% set datetime_end = ((as_timestamp(today_at(local_times_range_pm[-1])) + (86400*day)) | timestamp_utc) -%}
+          {% set temp = hourly_weather_forecast | selectattr('datetime','>=',datetime_start) | selectattr('datetime','<',datetime_end) |map(attribute='temperature') | average | round(1) -%}
+          {% set datetime = ((as_timestamp(today_at(local_times_range_pm[0])) + (86400*day)) | timestamp_local) %}
+          {% set prediction = ({"datetime":datetime,"day":day,"peak":'PM',"temp":temp,"critical":(e**(-4.40982668173898+-0.347977050508489*temp)/(1+e**(-4.40982668173898+-0.347977050508489*temp)) *100) | round(0)})  -%}
+          {% set data.predictionslist = data.predictionslist + [prediction] -%}
+
+        {% endfor -%}
+        
+        {{ data.predictionslist }}
