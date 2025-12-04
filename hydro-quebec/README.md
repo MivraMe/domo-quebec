@@ -32,8 +32,11 @@ Les détails de la configuration sont disponible ici : [Configuration_info-panne
 
 ## Autres configurations d'intérêt
 
-Le dossier [hydro-quebec/home-assistant/packages]hydro-quebec/home-assistant/packages contient deux fichiers "tarif" qui sont des configurations qui peuvent être utilisées avec un lecteur de consommation électrique "live" pour calculer le cout de l'électricité consommée.
+### Algorithme de prévision de pointes
+Un algorithme pour prédire les pointe critique sur le réseau d'Hydro-Québec est également disponible. Les information pour celui-ci sont disponibles dans isualiser les probabilités de pointes critiques (Hydro-Québec) sont disponibles ici : [Prévision de pointe critique](hydro-quebec/prevision_defi)
 
+### Suivis du tarif
+Le dossier [hydro-quebec/home-assistant/packages]hydro-quebec/home-assistant/packages contient deux fichiers "tarif" qui sont des configurations qui peuvent être utilisées avec un lecteur de consommation électrique "live" pour calculer le cout de l'électricité consommée.
 ## Installation
 
 ### Home-Assistant
